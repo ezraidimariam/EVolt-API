@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    // Simple registration
+    // Simple registration with Sanctum
     public function register(Request $request)
     {
         // Simple validation
@@ -37,14 +37,21 @@ class AuthController extends Controller
                 'role' => $request->role ?? 'user'
             ]);
 
+            // Create Sanctum token for new user
+            $token = $user->createToken('auth_token')->plainTextToken;
+
             return response()->json([
                 'success' => true,
                 'message' => 'User registered successfully',
                 'data' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'role' => $user->role
+                    'user' => [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'role' => $user->role
+                    ],
+                    'access_token' => $token,
+                    'token_type' => 'Bearer'
                 ]
             ], 201);
 
@@ -56,7 +63,7 @@ class AuthController extends Controller
         }
     }
 
-    // Simple login
+    // Simple login with Sanctum
     public function login(Request $request)
     {
         // Simple validation
@@ -77,8 +84,8 @@ class AuthController extends Controller
             ], 401);
         }
 
-        // Create simple token (for demo - in production use Sanctum)
-        $token = 'simple_token_' . md5($user->email . time());
+        // Create Sanctum token
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'success' => true,
@@ -90,32 +97,45 @@ class AuthController extends Controller
                     'email' => $user->email,
                     'role' => $user->role
                 ],
-                'token' => $token,
+                'access_token' => $token,
                 'token_type' => 'Bearer'
             ]
         ]);
     }
 
-    // Simple logout
+    // Simple logout with Sanctum
     public function logout(Request $request)
     {
+        // Get current user from token
+        $user = $request->user();
+        
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not authenticated'
+            ], 401);
+        }
+
+        // Delete current token
+        $user->currentAccessToken()->delete();
+
         return response()->json([
             'success' => true,
             'message' => 'Logged out successfully'
         ]);
     }
 
-    // Get current user info
+    // Get current user info with Sanctum
     public function me(Request $request)
     {
-        // For demo - return first user (in production use auth middleware)
-        $user = User::first();
+        // Get current user from token
+        $user = $request->user();
 
         if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'No users found'
-            ], 404);
+                'message' => 'User not authenticated'
+            ], 401);
         }
 
         return response()->json([
