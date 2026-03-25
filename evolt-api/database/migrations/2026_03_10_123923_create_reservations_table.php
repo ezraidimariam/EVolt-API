@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('charging_station_id')->constrained()->onDelete('cascade');
             $table->dateTime('start_time');
             $table->dateTime('end_time');
-            $table->enum('status', ['pending', 'confirmed', 'cancelled', 'completed'])->default('pending');
+            $table->enum('status', ['en_cours', 'payee', 'annulee'])->default('en_cours');
             $table->timestamps();
         });
     }

@@ -36,7 +36,7 @@ class Reservation extends Model
 
     public function canBeModified()
     {
-        return in_array($this->status, ['pending', 'confirmed']) && 
+        return in_array($this->status, ['en_cours']) && 
                $this->start_time > now();
     }
 }

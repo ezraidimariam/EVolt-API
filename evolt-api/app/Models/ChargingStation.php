@@ -48,7 +48,7 @@ class ChargingStation extends Model
                       ->where('end_time', '<=', $endTime);
                 });
             })
-            ->whereIn('status', ['pending', 'confirmed'])
+            ->whereIn('status', ['en_cours'])
             ->exists();
     }
 }

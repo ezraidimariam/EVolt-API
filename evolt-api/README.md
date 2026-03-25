@@ -1,59 +1,123 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# EVolt API - Electric Vehicle Charging Stations Management
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel REST API for managing electric vehicle charging stations, allowing users to search for available stations, make reservations, and track charging sessions.
 
-## About Laravel
+## 🚀 Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### User Features
+- 🔐 **Authentication** with Laravel Sanctum
+- ⚡ **Search** charging stations by location and connector type
+- 📅 **Create** charging reservations
+- 🔄 **Modify** reservations (pay/cancel)
+- 📊 **View** personal charging history
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Admin Features
+- 🔧 **CRUD** operations for charging stations
+- 📈 **Dashboard** with reservation statistics
+- 👥 **User** management capabilities
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 📋 API Endpoints
 
-## Learning Laravel
+### Authentication
+```
+POST /api/register     - Register new user
+POST /api/login        - User login
+POST /api/logout       - User logout
+GET  /api/user         - Get current user
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Charging Stations
+```
+GET  /api/charging-stations              - List all available stations
+GET  /api/charging-stations/search      - Search stations by location
+POST /api/admin/charging-stations       - [Admin] Create station
+PUT  /api/admin/charging-stations/{id}  - [Admin] Update station
+DELETE /api/admin/charging-stations/{id} [Admin] Delete station
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Reservations
+```
+POST /api/reservations                  - Create reservation
+GET  /api/my-reservations              - Get my reservations
+POST /api/reservations/{id}/pay         - Pay reservation
+POST /api/reservations/{id}/cancel      - Cancel reservation
+```
 
-## Laravel Sponsors
+### Admin Dashboard
+```
+GET /api/admin/dashboard                - Get statistics and recent reservations
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 🛠️ Installation
 
-### Premium Partners
+1. **Clone repository**
+```bash
+git clone <repository-url>
+cd evolt-api
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+2. **Install dependencies**
+```bash
+composer install
+npm install
+```
 
-## Contributing
+3. **Environment setup**
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+4. **Database setup**
+```bash
+php artisan migrate:fresh --seed
+```
 
-## Code of Conduct
+5. **Start server**
+```bash
+php artisan serve --host=127.0.0.1 --port=8000
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 📊 Database Schema
 
-## Security Vulnerabilities
+### Users
+- `id`, `name`, `email`, `password`, `role` (user/admin)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Charging Stations  
+- `id`, `name`, `address`, `latitude`, `longitude`, `connector_type`, `power_kw`, `is_available`
 
-## License
+### Reservations
+- `id`, `user_id`, `charging_station_id`, `start_time`, `end_time`, `status` (en_cours/payee/annulee)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 🧪 Testing
+
+### Postman Collection
+Import `POSTMAN_COLLECTION.json` for complete API testing.
+
+### Manual Testing
+See `TESTING_GUIDE.md` for detailed testing instructions.
+
+### Test Users (from seeder)
+- **Admin**: admin@evolt.com / password
+- **User**: user@evolt.com / password
+
+## 📝 Project Challenges Completed
+
+✅ **Challenge 1** - UML + Project Setup  
+✅ **Challenge 2** - Create Reservation  
+✅ **Challenge 3** - List My Reservations  
+✅ **Challenge 4** - Pay Reservation  
+✅ **Challenge 5** - Cancel Reservation  
+✅ **Challenge 6** - Admin Dashboard  
+
+## 🔧 Technologies Used
+
+- **Backend**: Laravel 12
+- **Authentication**: Laravel Sanctum  
+- **Database**: SQLite
+- **API Documentation**: Postman Collection
+- **Testing**: PHPUnit + Postman
+
+## 📄 License
+
+This project is for educational purposes as part of the EVolt API development challenge.
