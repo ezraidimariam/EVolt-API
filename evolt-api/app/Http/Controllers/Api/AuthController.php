@@ -10,64 +10,124 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+    // Simple registration
     public function register(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'role' => 'sometimes|in:user,admin'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+        // Simple validation
+        if (!$request->name || !$request->email || !$request->password) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Name, email and password are required'
+            ], 400);
         }
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role ?? 'user',
-        ]);
+        // Check if email already exists
+        if (User::where('email', $request->email)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email already exists'
+            ], 400);
+        }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        try {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => $request->role ?? 'user'
+            ]);
 
-        return response()->json([
-            'user' => $user,
-            'token' => $token,
-            'token_type' => 'Bearer'
-        ], 201);
+            return response()->json([
+                'success' => true,
+                'message' => 'User registered successfully',
+                'data' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role
+                ]
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Registration failed: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
+    // Simple login
     public function login(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+        // Simple validation
+        if (!$request->email || !$request->password) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email and password are required'
+            ], 400);
         }
 
+        // Find user
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid email or password'
+            ], 401);
         }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        // Create simple token (for demo - in production use Sanctum)
+        $token = 'simple_token_' . md5($user->email . time());
 
         return response()->json([
-            'user' => $user,
-            'token' => $token,
-            'token_type' => 'Bearer'
+            'success' => true,
+            'message' => 'Login successful',
+            'data' => [
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role
+                ],
+                'token' => $token,
+                'token_type' => 'Bearer'
+            ]
         ]);
     }
 
+    // Simple logout
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Logged out successfully']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Logged out successfully'
+        ]);
+    }
+
+    // Get current user info
+    public function me(Request $request)
+    {
+        // For demo - return first user (in production use auth middleware)
+        $user = User::first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No users found'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User info retrieved successfully',
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'created_at' => $user->created_at->format('d/m/Y H:i')
+            ]
+        ]);
     }
 }
